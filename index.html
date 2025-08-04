@@ -7,7 +7,7 @@
   <style>
     @font-face {
       font-family: 'ChicagoGT';
-      src: url('cff.ttf') format('truetype');
+      src: url('chichagotlf.ttf') format('truetype');
     }
 
     body {
@@ -49,12 +49,7 @@
 
     .frame {
       padding: 8px;
-      background:
-        repeating-linear-gradient(
-          45deg,
-          black 0 10px,
-          white 10px 20px
-        );
+      background: repeating-linear-gradient(45deg, black 0 10px, white 10px 20px);
       display: inline-block;
       box-shadow: 4px 4px #404040;
       margin-top: 10px;
@@ -139,7 +134,7 @@
   </style>
 </head>
 <body>
-  <img src="ethossnake.png" class="logo" alt="EthOS Sanake Logo">
+  <img src="ethossnake.png" class="logo" alt="Logo">
 
   <div id="topBar">
     <div id="scoreBox" class="score" style="display: none;">Score: <span id="score">0</span></div>
@@ -155,7 +150,7 @@
   <div id="introText" class="score intro">
     Welcome to <b>EthOS Snake</b>!<br>
     This game is all about <i>Pure Fun</i>.<br>
-    Eat coins. Grow long. Get retro. LFG.
+    Eat coins. Grow long. Get retro. LFG!!!
   </div>
 
   <div id="gameOverPopup">
@@ -167,13 +162,20 @@
   <div id="rulesPopup">
     <h2>📜 Rules</h2>
     <ul>
-      <li>Eat ETH 5x to unlock BTC.</li>
+      <li>Eat ETH 5x to unlock BTC coin.</li>
       <li>ETH gives 10 points. BTC gives 50 points.</li>
       <li>Don't hit the wall or yourself!</li>
       <li>Use arrow keys to move.</li>
     </ul>
     <button id="closeRules" class="retro-btn">Close</button>
   </div>
+
+  
+  <audio id="bgMusic" src="ethosmusic.mp3" loop preload="auto"></audio>
+  <audio id="eatSound" src="eat.mp3" preload="auto"></audio>
+  <audio id="btcPing" src="pingbtc.mp3" preload="auto"></audio>
+  <audio id="gameOverSound" src="gameover.mp3" preload="auto"></audio>
+  <audio id="clickSound" src="click.mp3" preload="auto"></audio>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
@@ -184,6 +186,12 @@
     const finalScore = document.getElementById("finalScore");
     const frame = document.getElementById("frame");
     const scoreBox = document.getElementById("scoreBox");
+
+    const bgMusic = document.getElementById("bgMusic");
+    const eatSound = document.getElementById("eatSound");
+    const btcPing = document.getElementById("btcPing");
+    const gameOverSound = document.getElementById("gameOverSound");
+    const clickSound = document.getElementById("clickSound");
 
     const box = 36;
     const rows = canvas.height / box;
@@ -223,6 +231,8 @@
     function gameOver() {
       clearInterval(game);
       finalScore.textContent = score;
+      gameOverSound.currentTime = 0;
+      gameOverSound.play();
       popup.style.display = "block";
     }
 
@@ -235,9 +245,7 @@
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (currentFoodType === "btc") frame.classList.add("rainbow");
-      else frame.classList.remove("rainbow");
-
+      frame.classList.toggle("rainbow", currentFoodType === "btc");
       drawSnake();
       drawFood();
 
@@ -247,29 +255,20 @@
       if (direction === "LEFT") head.x -= box;
       if (direction === "RIGHT") head.x += box;
 
-      
-      if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
-        gameOver();
-        return;
-      }
-
-      
-      for (let i = 1; i < snake.length; i++) {
-        if (head.x === snake[i].x && head.y === snake[i].y) {
-          gameOver();
-          return;
-        }
-      }
+      if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) return gameOver();
+      if (snake.some((s, i) => i > 0 && s.x === head.x && s.y === head.y)) return gameOver();
 
       snake.unshift(head);
 
       if (head.x === food.x && head.y === food.y) {
+        eatSound.play();
         if (currentFoodType === "eth") {
           score += 10;
           ethEaten++;
           if (ethEaten >= 5) {
             currentFoodType = "btc";
             ethEaten = 0;
+            btcPing.play();
           }
         } else {
           score += 50;
@@ -298,13 +297,34 @@
       ethEaten = 0;
       currentFoodType = "eth";
       randomFood();
-      draw();
       if (game) clearInterval(game);
+      draw();
       game = setInterval(draw, 160);
     }
 
-    startBtn.onclick = startGame;
-    document.getElementById("restartBtn").onclick = startGame;
+    startBtn.onclick = () => {
+      clickSound.play();
+      if (bgMusic.paused) {
+        bgMusic.currentTime = 0;
+        bgMusic.play();
+      }
+      startGame();
+    };
+
+    document.getElementById("restartBtn").onclick = () => {
+      clickSound.play();
+      startGame();
+    };
+
+    document.getElementById("rulesBtn").onclick = () => {
+      clickSound.play();
+      document.getElementById("rulesPopup").style.display = "block";
+    };
+
+    document.getElementById("closeRules").onclick = () => {
+      clickSound.play();
+      document.getElementById("rulesPopup").style.display = "none";
+    };
 
     document.addEventListener("keydown", e => {
       if (e.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
@@ -312,14 +332,6 @@
       else if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
       else if (e.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
     });
-
-    document.getElementById("rulesBtn").onclick = () => {
-      document.getElementById("rulesPopup").style.display = "block";
-    };
-
-    document.getElementById("closeRules").onclick = () => {
-      document.getElementById("rulesPopup").style.display = "none";
-    };
   </script>
 </body>
 </html>
