@@ -222,13 +222,16 @@
       }
 
       
-      for (let i = 1; i < snake.length; i++) {
-        const part = snake[i];
-        if (Math.abs(head.x - part.x) < box/2 && Math.abs(head.y - part.y) < box/2) {
-          gameOver();
-          return;
-        }
-      }
+      if (snake.length > 4) {
+  for (let i = 1; i < snake.length; i++) {
+    const part = snake[i];
+    if (Math.abs(head.x - part.x) < box / 2 && Math.abs(head.y - part.y) < box / 2) {
+      gameOver();
+      return;
+    }
+  }
+}
+
 
       
       snake.unshift(head);
