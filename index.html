@@ -240,8 +240,8 @@
     const clickSound = document.getElementById("clickSound");
 
     const box = 36;
-    const rows = canvas.height / box;
-    const cols = canvas.width / box;
+const cols = Math.floor(canvas.width / box);
+const rows = Math.floor(canvas.height / box);
 
     let snake, direction, food, score, ethEaten, currentFoodType, game;
 
@@ -284,11 +284,11 @@
     }
 
     function randomFood() {
-      food = {
-        x: Math.floor(Math.random() * cols) * box,
-        y: Math.floor(Math.random() * rows) * box
-      };
-    }
+  food = {
+    x: Math.floor(Math.random() * cols) * box,
+    y: Math.floor(Math.random() * rows) * box
+  };
+}
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
