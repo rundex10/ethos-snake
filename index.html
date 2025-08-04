@@ -263,18 +263,26 @@
     }
 
     startBtn.onclick = () => {
-      startBtn.style.display = "none";
-      canvas.style.display = "block";
-      snake.length = 0;
-      snake.push({ x: 100, y: 100 });
-      vx = speed;
-      vy = 0;
-      score = 0;
-      ethEaten = 0;
-      currentFoodType = "eth";
-      placeFood();
-      animate();
-    };
+  startBtn.style.display = "none";
+  canvas.style.display = "block";
+
+  
+  const startX = Math.floor(canvas.width / 2 / box) * box;
+  const startY = Math.floor(canvas.height / 2 / box) * box;
+
+  snake.length = 0;
+  snake.push({ x: startX, y: startY });
+  vx = speed;
+  vy = 0;
+  direction = "RIGHT";
+  score = 0;
+  ethEaten = 0;
+  currentFoodType = "eth";
+  placeFood();
+  cancelAnimationFrame(animationId);
+  animate();
+};
+
   </script>
 </body>
 </html>
