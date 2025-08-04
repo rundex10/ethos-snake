@@ -3,12 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>EthOS Snake - Retro Mode</title>
+  <title>EthOS Snake - Play Fun</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       background-color: #a6c1ee;
       font-family: 'Courier New', Courier, monospace;
@@ -24,17 +21,18 @@
       position: absolute;
       top: 10px;
       left: 10px;
-      height: 30px;
+      height: 32px;
+      image-rendering: pixelated;
     }
 
     .score {
       background: #000080;
       color: white;
-      width: 960px;
+      width: 600px;
       padding: 10px 0;
       text-align: center;
       font-weight: bold;
-      font-size: 18px;
+      font-size: 16px;
       border: 2px solid black;
       box-shadow: inset -2px -2px #ffffff, inset 2px 2px #404040;
       margin-top: 60px;
@@ -42,9 +40,9 @@
 
     canvas {
       display: none;
-      background-color: #a6c1ee;
-      border: 3px solid black;
-      box-shadow: inset -2px -2px #ffffff, inset 2px 2px #404040;
+      background-color: #d0e0ff;
+      border: 4px solid #000;
+      box-shadow: 4px 4px #404040;
       margin-top: 10px;
     }
 
@@ -63,9 +61,7 @@
       cursor: pointer;
     }
 
-    #startBtn:hover {
-      background: #c0c0c0;
-    }
+    #startBtn:hover { background: #c0c0c0; }
 
     #startBtn:active {
       border-top-color: #404040;
@@ -86,7 +82,7 @@
       padding: 20px;
       text-align: center;
       z-index: 10;
-      width: 320px;
+      width: 300px;
       font-family: 'Courier New', monospace;
     }
 
@@ -122,9 +118,10 @@
   </style>
 </head>
 <body>
-  <img src="ethos-logo.png" class="logo" alt="EthOS Logo">
+  <!-- Ganti src sesuai nama file logo kamu -->
+  <img src="ethossnake.png" class="logo" alt="EthOS Snake Logo">
   <div class="score">Score: <span id="score">0</span></div>
-  <canvas id="gameCanvas" width="960" height="600"></canvas>
+  <canvas id="gameCanvas" width="600" height="480"></canvas>
   <button id="startBtn">Start Game</button>
 
   <div id="gameOverPopup">
@@ -141,7 +138,7 @@
     const popup = document.getElementById("gameOverPopup");
     const finalScore = document.getElementById("finalScore");
 
-    const box = 48;
+    const box = 24;
     const gridSizeX = canvas.width / box;
     const gridSizeY = canvas.height / box;
     let snake, direction, score, ethEaten, currentFoodType, food, game;
@@ -172,22 +169,14 @@
 
         ctx.save();
         ctx.translate(part.x + box / 2, part.y + box / 2);
-
         let angle = 0;
         if (direction === "UP") angle = -Math.PI / 2;
         else if (direction === "DOWN") angle = Math.PI / 2;
         else if (direction === "LEFT") angle = Math.PI;
-
         ctx.rotate(angle);
 
-        if (isHead) {
-          const size = box * 1.2;
-          ctx.drawImage(headImg, -size / 2, -size / 2, size, size);
-        } else {
-          const size = box * 0.5;
-          ctx.drawImage(headImg, -size / 2, -size / 2, size, size);
-        }
-
+        const size = isHead ? box * 1.2 : box * 0.5;
+        ctx.drawImage(headImg, -size / 2, -size / 2, size, size);
         ctx.restore();
       }
 
@@ -214,7 +203,10 @@
         return;
       }
 
-      if (headX === food.x && headY === food.y) {
+      if (
+        Math.abs(headX - food.x) < box / 2 &&
+        Math.abs(headY - food.y) < box / 2
+      ) {
         if (currentFoodType === "eth") {
           score += 10;
           ethEaten += 1;
@@ -247,7 +239,7 @@
         x: Math.floor(Math.random() * gridSizeX) * box,
         y: Math.floor(Math.random() * gridSizeY) * box
       };
-      game = setInterval(draw, 150); // slower speed
+      game = setInterval(draw, 160);
     }
 
     startBtn.addEventListener("click", startGame);
