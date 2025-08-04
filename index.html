@@ -3,12 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>EthOS Snake - Play Fun</title>
+  <title>EthOS Snake by @murphyefjr</title>
+
   <style>
+    @font-face {
+      font-family: 'ChicagoGT';
+      src: url('chichagotlf.ttf') format('truetype');
+    }
+
     * { box-sizing: border-box; }
+
     body {
       background-color: #a6c1ee;
-      font-family: 'Courier New', Courier, monospace;
+      font-family: 'ChicagoGT', monospace;
       margin: 0;
       padding: 0;
       display: flex;
@@ -21,7 +28,7 @@
       position: absolute;
       top: 10px;
       left: 10px;
-      height: 32px;
+      height: 64px;
       image-rendering: pixelated;
     }
 
@@ -48,7 +55,7 @@
 
     #startBtn {
       margin-top: 25px;
-      font-family: inherit;
+      font-family: 'ChicagoGT', monospace;
       font-size: 16px;
       padding: 8px 25px;
       background: #dcdcdc;
@@ -83,7 +90,7 @@
       text-align: center;
       z-index: 10;
       width: 300px;
-      font-family: 'Courier New', monospace;
+      font-family: 'ChicagoGT', monospace;
     }
 
     #gameOverPopup h2 {
@@ -99,7 +106,7 @@
     #gameOverPopup button {
       margin-top: 15px;
       padding: 6px 20px;
-      font-family: inherit;
+      font-family: 'ChicagoGT', monospace;
       background: #e0e0e0;
       border: 2px solid;
       border-top-color: #ffffff;
@@ -118,7 +125,6 @@
   </style>
 </head>
 <body>
-  <!-- Ganti src sesuai nama file logo kamu -->
   <img src="ethossnake.png" class="logo" alt="EthOS Snake Logo">
   <div class="score">Score: <span id="score">0</span></div>
   <canvas id="gameCanvas" width="600" height="480"></canvas>
