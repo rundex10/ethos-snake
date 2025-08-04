@@ -10,16 +10,14 @@
       src: url('cff.ttf') format('truetype');
     }
 
-    * { box-sizing: border-box; }
-
     body {
       background-color: #a6c1ee;
       font-family: 'ChicagoGT', monospace;
       margin: 0;
-      padding: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: start;
       height: 100vh;
     }
 
@@ -34,27 +32,26 @@
     .score {
       background: #000080;
       color: white;
-      width: 600px;
-      padding: 10px 0;
+      width: 720px;
+      padding: 8px;
       text-align: center;
       font-weight: bold;
-      font-size: 16px;
       border: 2px solid black;
-      box-shadow: inset -2px -2px #ffffff, inset 2px 2px #404040;
+      box-shadow: inset -2px -2px #fff, inset 2px 2px #404040;
       margin-top: 60px;
+      font-size: 18px;
     }
 
     canvas {
       display: none;
-      background-color: #d0e0ff;
+      background-color: #c0d8ff;
       border: 4px solid #000;
       box-shadow: 4px 4px #404040;
       margin-top: 10px;
-      transition: filter 0.3s;
     }
 
-    .rainbow-frame {
-      animation: rainbowSpin 2s linear infinite;
+    .rainbow {
+      animation: rainbowSpin 1.5s linear infinite;
     }
 
     @keyframes rainbowSpin {
@@ -63,27 +60,24 @@
     }
 
     #startBtn {
-      margin-top: 25px;
+      margin-top: 30px;
       font-family: 'ChicagoGT', monospace;
       font-size: 16px;
-      padding: 8px 25px;
-      background: #dcdcdc;
-      color: black;
+      padding: 8px 24px;
+      background: #e0e0e0;
       border: 2px solid;
-      border-top-color: #ffffff;
-      border-left-color: #ffffff;
+      border-top-color: #fff;
+      border-left-color: #fff;
       border-bottom-color: #404040;
       border-right-color: #404040;
       cursor: pointer;
     }
 
-    #startBtn:hover { background: #c0c0c0; }
-
     #startBtn:active {
       border-top-color: #404040;
       border-left-color: #404040;
-      border-bottom-color: #ffffff;
-      border-right-color: #ffffff;
+      border-bottom-color: #fff;
+      border-right-color: #fff;
     }
 
     #gameOverPopup {
@@ -98,7 +92,6 @@
       padding: 20px;
       text-align: center;
       z-index: 10;
-      width: 300px;
       font-family: 'ChicagoGT', monospace;
     }
 
@@ -113,13 +106,13 @@
     }
 
     #gameOverPopup button {
-      margin-top: 15px;
+      margin-top: 10px;
       padding: 6px 20px;
-      font-family: 'ChicagoGT', monospace;
       background: #e0e0e0;
+      font-family: 'ChicagoGT', monospace;
       border: 2px solid;
-      border-top-color: #ffffff;
-      border-left-color: #ffffff;
+      border-top-color: #fff;
+      border-left-color: #fff;
       border-bottom-color: #404040;
       border-right-color: #404040;
       cursor: pointer;
@@ -128,15 +121,15 @@
     #gameOverPopup button:active {
       border-top-color: #404040;
       border-left-color: #404040;
-      border-bottom-color: #ffffff;
-      border-right-color: #ffffff;
+      border-bottom-color: #fff;
+      border-right-color: #fff;
     }
   </style>
 </head>
 <body>
-  <img src="ethossnake.png" class="logo" alt="EthOS Logo">
+  <img src="ethossnake.png" class="logo" alt="Logo">
   <div class="score">Score: <span id="score">0</span></div>
-  <canvas id="gameCanvas" width="600" height="480"></canvas>
+  <canvas id="gameCanvas" width="720" height="480"></canvas>
   <button id="startBtn">Start Game</button>
 
   <div id="gameOverPopup">
@@ -153,99 +146,85 @@
     const popup = document.getElementById("gameOverPopup");
     const finalScore = document.getElementById("finalScore");
 
-    const box = 30;
-    const snake = [];
-    const tailLength = 10;
-    const speed = 2.5;
-    let direction = "RIGHT";
-    let vx = speed;
-    let vy = 0;
-    let food = { x: 0, y: 0 };
-    let currentFoodType = "eth";
-    let ethEaten = 0;
-    let score = 0;
-    let headImg = new Image();
+    const box = 36;
+    const rows = canvas.height / box;
+    const cols = canvas.width / box;
+
+    let snake, direction, food, score, ethEaten, currentFoodType, game;
+
+    const headImg = new Image();
     headImg.src = "ethoshead.png";
+
     const ethImg = new Image();
     ethImg.src = "foodeth.png";
+
     const btcImg = new Image();
     btcImg.src = "foodbtc.png";
 
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowUp" && vy === 0) { vx = 0; vy = -speed; direction = "UP"; }
-      if (e.key === "ArrowDown" && vy === 0) { vx = 0; vy = speed; direction = "DOWN"; }
-      if (e.key === "ArrowLeft" && vx === 0) { vx = -speed; vy = 0; direction = "LEFT"; }
-      if (e.key === "ArrowRight" && vx === 0) { vx = speed; vy = 0; direction = "RIGHT"; }
-    });
+    function drawSnake() {
+      for (let i = 0; i < snake.length; i++) {
+        ctx.save();
+        ctx.translate(snake[i].x + box / 2, snake[i].y + box / 2);
+        let angle = 0;
+        if (direction === "UP") angle = -Math.PI / 2;
+        if (direction === "DOWN") angle = Math.PI / 2;
+        if (direction === "LEFT") angle = Math.PI;
+        ctx.rotate(angle);
+        const size = i === 0 ? box * 1.2 : box * 0.5;
+        ctx.drawImage(headImg, -size / 2, -size / 2, size, size);
+        ctx.restore();
+      }
+    }
+
+    function drawFood() {
+      const img = currentFoodType === "eth" ? ethImg : btcImg;
+      ctx.drawImage(img, food.x, food.y, box, box);
+    }
 
     function gameOver() {
+      clearInterval(game);
       finalScore.textContent = score;
       popup.style.display = "block";
-      cancelAnimationFrame(animationId);
     }
 
-    function placeFood() {
-      food.x = Math.floor(Math.random() * ((canvas.width - box) / box)) * box;
-      food.y = Math.floor(Math.random() * ((canvas.height - box) / box)) * box;
-    }
-
-    function drawSnakePart(x, y, isHead = false) {
-      ctx.save();
-      ctx.translate(x + box / 2, y + box / 2);
-      let angle = 0;
-      if (direction === "UP") angle = -Math.PI / 2;
-      if (direction === "DOWN") angle = Math.PI / 2;
-      if (direction === "LEFT") angle = Math.PI;
-      ctx.rotate(angle);
-      const size = isHead ? box * 1.2 : box * 0.5;
-      ctx.drawImage(headImg, -size/2, -size/2, size, size);
-      ctx.restore();
-    }
-
-    let animationId;
-    function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      if (currentFoodType === "btc") canvas.classList.add("rainbow-frame");
-      else canvas.classList.remove("rainbow-frame");
-
-      
-      const head = {
-        x: (snake[0]?.x || 100) + vx,
-        y: (snake[0]?.y || 100) + vy
+    function randomFood() {
+      food = {
+        x: Math.floor(Math.random() * cols) * box,
+        y: Math.floor(Math.random() * rows) * box
       };
+    }
 
-      
-      if (head.x < 0 || head.x + box > canvas.width || head.y < 0 || head.y + box > canvas.height) {
-        gameOver();
-        return;
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (currentFoodType === "btc") canvas.classList.add("rainbow");
+      else canvas.classList.remove("rainbow");
+
+      drawSnake();
+      drawFood();
+
+      let head = { x: snake[0].x, y: snake[0].y };
+      if (direction === "UP") head.y -= box;
+      if (direction === "DOWN") head.y += box;
+      if (direction === "LEFT") head.x -= box;
+      if (direction === "RIGHT") head.x += box;
+
+      // Wrap around
+      if (head.x < 0) head.x = canvas.width - box;
+      if (head.x >= canvas.width) head.x = 0;
+      if (head.y < 0) head.y = canvas.height - box;
+      if (head.y >= canvas.height) head.y = 0;
+
+      // Game over if hit self
+      for (let i = 1; i < snake.length; i++) {
+        if (head.x === snake[i].x && head.y === snake[i].y) {
+          gameOver();
+          return;
+        }
       }
 
-      
-      if (snake.length > 4) {
-  for (let i = 1; i < snake.length; i++) {
-    const part = snake[i];
-    if (Math.abs(head.x - part.x) < box / 2 && Math.abs(head.y - part.y) < box / 2) {
-      gameOver();
-      return;
-    }
-  }
-}
-
-
-      
       snake.unshift(head);
-      while (snake.length > tailLength) snake.pop();
 
-      
-      snake.forEach((s, i) => drawSnakePart(s.x, s.y, i === 0));
-
-      
-      const foodImg = currentFoodType === "eth" ? ethImg : btcImg;
-      ctx.drawImage(foodImg, food.x, food.y, box, box);
-
-      
-      if (Math.abs(head.x - food.x) < box && Math.abs(head.y - food.y) < box) {
+      if (head.x === food.x && head.y === food.y) {
         if (currentFoodType === "eth") {
           score += 10;
           ethEaten++;
@@ -256,36 +235,37 @@
         } else {
           score += 50;
           currentFoodType = "eth";
-          ethEaten = 0;
         }
-        placeFood();
+        randomFood();
+      } else {
+        snake.pop();
       }
 
       scoreDisplay.textContent = score;
-      animationId = requestAnimationFrame(animate);
     }
 
     startBtn.onclick = () => {
-  startBtn.style.display = "none";
-  canvas.style.display = "block";
+      startBtn.style.display = "none";
+      canvas.style.display = "block";
 
-  
-  const startX = Math.floor(canvas.width / 2 / box) * box;
-  const startY = Math.floor(canvas.height / 2 / box) * box;
+      const startX = Math.floor(cols / 2) * box;
+      const startY = Math.floor(rows / 2) * box;
+      snake = [{ x: startX, y: startY }];
+      direction = "RIGHT";
+      score = 0;
+      ethEaten = 0;
+      currentFoodType = "eth";
+      randomFood();
+      draw();
+      game = setInterval(draw, 160); // adjust speed here
+    };
 
-  snake.length = 0;
-  snake.push({ x: startX, y: startY });
-  vx = speed;
-  vy = 0;
-  direction = "RIGHT";
-  score = 0;
-  ethEaten = 0;
-  currentFoodType = "eth";
-  placeFood();
-  cancelAnimationFrame(animationId);
-  animate();
-};
-
+    document.addEventListener("keydown", e => {
+      if (e.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
+      else if (e.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
+      else if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
+      else if (e.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
+    });
   </script>
 </body>
 </html>
