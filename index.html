@@ -178,7 +178,7 @@
     <canvas id="gameCanvas" width="720" height="480"></canvas>
   </div>
 
-  <div id="controls" class="retro-controls">
+  <div id="controls" class="retro-controls" style="display: none;>
   <button data-dir="UP">⬆️</button>
   <div>
     <button data-dir="LEFT">⬅️</button>
@@ -278,6 +278,7 @@
       gameOverSound.currentTime = 0;
       gameOverSound.play();
       popup.style.display = "block";
+      document.getElementById("controls").style.display = "none";
     }
 
     function randomFood() {
@@ -332,6 +333,7 @@
       document.getElementById("introText").style.display = "none";
       scoreBox.style.display = "block";
       canvas.style.display = "block";
+      document.getElementById("controls").style.display = "flex";
 
       const startX = Math.floor(cols / 2) * box;
       const startY = Math.floor(rows / 2) * box;
