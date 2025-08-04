@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>EthOS Snake - Play Fun</title>
+  <title>EthOS Snake Classic</title>
   <style>
     @font-face {
       font-family: 'ChicagoGT';
-      src: url('chichagotlf.ttf') format('truetype');
+      src: url('cff.ttf') format('truetype');
     }
 
     body {
@@ -26,25 +26,25 @@
       top: 10px;
       left: 10px;
       height: 64px;
-      image-rendering: pixelated;
     }
 
     .score {
       background: #000080;
       color: white;
-      width: 720px;
       padding: 8px;
       text-align: center;
       font-weight: bold;
       border: 2px solid black;
       box-shadow: inset -2px -2px #fff, inset 2px 2px #404040;
-      margin-top: 60px;
       font-size: 18px;
     }
 
     .intro {
       font-size: 20px;
       line-height: 1.6;
+      width: 720px;
+      margin-top: 20px;
+      text-align: center;
     }
 
     .frame {
@@ -76,11 +76,11 @@
       100% { filter: hue-rotate(360deg); }
     }
 
-    #startBtn {
-      margin-top: 30px;
+    #startBtn, .retro-btn {
+      margin-top: 20px;
       font-family: 'ChicagoGT', monospace;
       font-size: 16px;
-      padding: 8px 24px;
+      padding: 6px 20px;
       background: #e0e0e0;
       border: 2px solid;
       border-top-color: #fff;
@@ -90,14 +90,14 @@
       cursor: pointer;
     }
 
-    #startBtn:active {
+    #startBtn:active, .retro-btn:active {
       border-top-color: #404040;
       border-left-color: #404040;
       border-bottom-color: #fff;
       border-right-color: #fff;
     }
 
-    #gameOverPopup {
+    #gameOverPopup, #rulesPopup {
       display: none;
       position: fixed;
       top: 50%;
@@ -110,60 +110,69 @@
       text-align: center;
       z-index: 10;
       font-family: 'ChicagoGT', monospace;
+      width: 300px;
     }
 
-    #gameOverPopup h2 {
+    #gameOverPopup h2, #rulesPopup h2 {
       margin: 0 0 10px;
       font-size: 20px;
     }
 
     #gameOverPopup p {
-      margin: 5px 0;
       font-size: 16px;
+      margin: 5px 0;
     }
 
-    #gameOverPopup button {
-      margin-top: 10px;
-      padding: 6px 20px;
-      background: #e0e0e0;
-      font-family: 'ChicagoGT', monospace;
-      border: 2px solid;
-      border-top-color: #fff;
-      border-left-color: #fff;
-      border-bottom-color: #404040;
-      border-right-color: #404040;
-      cursor: pointer;
+    #rulesPopup ul {
+      text-align: left;
+      font-size: 16px;
+      padding-left: 20px;
     }
 
-    #gameOverPopup button:active {
-      border-top-color: #404040;
-      border-left-color: #404040;
-      border-bottom-color: #fff;
-      border-right-color: #fff;
+    #topBar {
+      width: 720px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 60px;
     }
   </style>
 </head>
 <body>
-  <img src="ethossnake.png" class="logo" alt="Logo">
-  
-  <div id="introText" class="score intro">
-    Welcome to <b>EthOS Snake</b>!<br>
-    This game is all about <i>Pure Fun</i>.<br>
-    Eat coins. Grow long. LFG.
+  <img src="ethos-logo.png" class="logo" alt="Logo">
+
+  <div id="topBar">
+    <div id="scoreBox" class="score" style="display: none;">Score: <span id="score">0</span></div>
+    <button id="rulesBtn" class="retro-btn">Rules</button>
   </div>
-  
+
   <div class="frame" id="frame">
     <canvas id="gameCanvas" width="720" height="480"></canvas>
   </div>
-  
+
   <button id="startBtn">Start Game</button>
 
-  <div id="scoreBox" class="score" style="display: none;">Score: <span id="score">0</span></div>
+  <div id="introText" class="score intro">
+    Welcome to <b>EthOS Snake Classic</b>!<br>
+    This game is all about <i>Pure Fun</i>.<br>
+    Eat coins. Grow long. Get retro. LFG.
+  </div>
 
   <div id="gameOverPopup">
     <h2>💀 Game Over</h2>
     <p>Your Score: <span id="finalScore">0</span></p>
-    <button id="restartBtn">Restart</button>
+    <button id="restartBtn" class="retro-btn">Restart</button>
+  </div>
+
+  <div id="rulesPopup">
+    <h2>📜 Rules</h2>
+    <ul>
+      <li>Eat ETH 5x to unlock BTC.</li>
+      <li>ETH gives 10 points. BTC gives 50 points.</li>
+      <li>Don't hit the wall or yourself!</li>
+      <li>Use arrow keys to move.</li>
+    </ul>
+    <button id="closeRules" class="retro-btn">Close</button>
   </div>
 
   <script>
@@ -303,6 +312,14 @@
       else if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
       else if (e.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
     });
+
+    document.getElementById("rulesBtn").onclick = () => {
+      document.getElementById("rulesPopup").style.display = "block";
+    };
+
+    document.getElementById("closeRules").onclick = () => {
+      document.getElementById("rulesPopup").style.display = "none";
+    };
   </script>
 </body>
 </html>
