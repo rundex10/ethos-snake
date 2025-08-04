@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>EthOS Snake - For Fun</title>
+  <title>EthOS Snake - Play Fun</title>
   <style>
     @font-face {
       font-family: 'ChicagoGT';
-      src: url('cff.ttf') format('truetype');
+      src: url('chichagotlf.ttf') format('truetype');
     }
 
     body {
@@ -40,6 +40,11 @@
       box-shadow: inset -2px -2px #fff, inset 2px 2px #404040;
       margin-top: 60px;
       font-size: 18px;
+    }
+
+    .intro {
+      font-size: 20px;
+      line-height: 1.6;
     }
 
     .frame {
@@ -140,16 +145,25 @@
 </head>
 <body>
   <img src="ethossnake.png" class="logo" alt="Logo">
-  <div class="score">Score: <span id="score">0</span></div>
+  
+  <div id="introText" class="score intro">
+    Welcome to <b>EthOS Snake</b>!<br>
+    This game is all about <i>Pure Fun</i>.<br>
+    Eat coins. Grow long. LFG.
+  </div>
+  
   <div class="frame" id="frame">
     <canvas id="gameCanvas" width="720" height="480"></canvas>
   </div>
+  
   <button id="startBtn">Start Game</button>
+
+  <div id="scoreBox" class="score" style="display: none;">Score: <span id="score">0</span></div>
 
   <div id="gameOverPopup">
     <h2>💀 Game Over</h2>
     <p>Your Score: <span id="finalScore">0</span></p>
-    <button onclick="location.reload()">Restart</button>
+    <button id="restartBtn">Restart</button>
   </div>
 
   <script>
@@ -160,6 +174,7 @@
     const popup = document.getElementById("gameOverPopup");
     const finalScore = document.getElementById("finalScore");
     const frame = document.getElementById("frame");
+    const scoreBox = document.getElementById("scoreBox");
 
     const box = 36;
     const rows = canvas.height / box;
@@ -259,8 +274,11 @@
       scoreDisplay.textContent = score;
     }
 
-    startBtn.onclick = () => {
+    function startGame() {
+      popup.style.display = "none";
       startBtn.style.display = "none";
+      document.getElementById("introText").style.display = "none";
+      scoreBox.style.display = "block";
       canvas.style.display = "block";
 
       const startX = Math.floor(cols / 2) * box;
@@ -272,8 +290,12 @@
       currentFoodType = "eth";
       randomFood();
       draw();
+      if (game) clearInterval(game);
       game = setInterval(draw, 160);
-    };
+    }
+
+    startBtn.onclick = startGame;
+    document.getElementById("restartBtn").onclick = startGame;
 
     document.addEventListener("keydown", e => {
       if (e.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
