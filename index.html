@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EthOS Snake Game</title>
+  <style>
+    body {
+      background-color: #a6c1ee;
+      font-family: 'Courier New', monospace;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: start;
+      height: 100vh;
+      position: relative;
+    }
+
+    .logo {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      height: 30px;
+    }
+
+    .score {
+      background: #000080;
+      color: white;
+      width: 400px;
+      padding: 8px;
+      text-align: center;
+      font-weight: bold;
+      border: 2px solid #000;
+      box-shadow: inset -2px -2px #fff, inset 2px 2px #404040;
+      margin-top: 60px;
+    }
+
+    canvas {
+      background-color: #111;
+      border: 2px solid #000;
+      box-shadow: inset -2px -2px #fff, inset 2px 2px #404040;
+      margin-top: 0;
+    }
+
+    #startBtn {
+      margin-top: 30px;
+      font-family: inherit;
+      font-size: 16px;
+      padding: 6px 20px;
+      background: #e0e0e0;
+      border: 2px solid;
+      border-top-color: #fff;
+      border-left-color: #fff;
+      border-bottom-color: #404040;
+      border-right-color: #404040;
+      cursor: pointer;
+    }
+
+    #startBtn:active {
+      border-top-color: #404040;
+      border-left-color: #404040;
+      border-bottom-color: #fff;
+      border-right-color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <img src="ethossnake.png" class="logo" alt="EthOS Logo">
+  <div class="score">Score: <span id="score">0</span></div>
+  <canvas id="gameCanvas" width="400" height="400" style="display: none;"></canvas>
+  <button id="startBtn">Start Game</button>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const scoreDisplay = document.getElementById("score");
+    const startBtn = document.getElementById("startBtn");
+
+    const box = 20;
+    const canvasSize = 20;
+    let snake, direction, score, ethEaten, currentFoodType, food, game;
+
+    const headImg = new Image();
+    headImg.src = 'ethoshead.png';
+
+    const ethImg = new Image();
+    ethImg.src = 'foodeth.png';
+
+    const btcImg = new Image();
+    btcImg.src = 'foodbtc.png';
+
+    document.addEventListener("keydown", (e) => {
+      if (!game) return; // Don't respond if game hasn't started
+      if (e.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
+      else if (e.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
+      else if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
+      else if (e.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
+    });
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw snake
+      for (let i = 0; i < snake.length; i++) {
+        if (i === 0) {
+          ctx.drawImage(headImg, snake[i].x, snake[i].y, box, box);
+        } else {
+          ctx.fillStyle = "green";
+          ctx.fillRect(snake[i].x, snake[i].y, box, box);
+        }
+      }
+
+      // Draw food
+      const foodImg = currentFoodType === "eth" ? ethImg : btcImg;
+      ctx.drawImage(foodImg, food.x, food.y, box, box);
+
+      // Move
+      let headX = snake[0].x;
+      let headY = snake[0].y;
+
+      if (direction === "UP") headY -= box;
+      if (direction === "DOWN") headY += box;
+      if (direction === "LEFT") headX -= box;
+      if (direction === "RIGHT") headX += box;
+
+      // Wrap
+      if (headX < 0) headX = canvas.width - box;
+      if (headX >= canvas.width) headX = 0;
+      if (headY < 0) headY = canvas.height - box;
+      if (headY >= canvas.height) headY = 0;
+
+      // Game over
+      if (snake.some((seg, i) => i !== 0 && seg.x === headX && seg.y === headY)) {
+        clearInterval(game);
+        alert("💀 Game Over!\nYour Score: " + score);
+        location.reload();
+        return;
+      }
+
+      // Eat
+      if (headX === food.x && headY === food.y) {
+        if (currentFoodType === "eth") {
+          score += 10;
+          ethEaten += 1;
+          if (ethEaten >= 5) currentFoodType = "btc";
+        } else {
+          score += 50;
+        }
+        food = {
+          x: Math.floor(Math.random() * canvasSize) * box,
+          y: Math.floor(Math.random() * canvasSize) * box
+        };
+      } else {
+        snake.pop();
+      }
+
+      const newHead = { x: headX, y: headY };
+      snake.unshift(newHead);
+      scoreDisplay.textContent = score;
+    }
+
+    function startGame() {
+      startBtn.style.display = "none";
+      canvas.style.display = "block";
+      snake = [{ x: 9 * box, y: 9 * box }];
+      direction = "RIGHT";
+      score = 0;
+      ethEaten = 0;
+      currentFoodType = "eth";
+      food = {
+        x: Math.floor(Math.random() * canvasSize) * box,
+        y: Math.floor(Math.random() * canvasSize) * box
+      };
+      game = setInterval(draw, 100);
+    }
+
+    startBtn.addEventListener("click", startGame);
+  </script>
+</body>
+</html>
