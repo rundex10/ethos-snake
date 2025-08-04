@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>EthOS Snake - Play Fun</title>
-
   <style>
     @font-face {
       font-family: 'ChicagoGT';
@@ -135,7 +134,7 @@
   </style>
 </head>
 <body>
-  <img src="ethos-logo.png" class="logo" alt="EthOS Snake Logo">
+  <img src="ethos-logo.png" class="logo" alt="EthOS Logo">
   <div class="score">Score: <span id="score">0</span></div>
   <canvas id="gameCanvas" width="600" height="480"></canvas>
   <button id="startBtn">Start Game</button>
@@ -154,82 +153,96 @@
     const popup = document.getElementById("gameOverPopup");
     const finalScore = document.getElementById("finalScore");
 
-    const box = 36;
-    const gridSizeX = canvas.width / box;
-    const gridSizeY = canvas.height / box;
-    let snake, direction, score, ethEaten, currentFoodType, food, game;
-
-    const headImg = new Image();
-    headImg.src = 'ethoshead.png';
-
+    const box = 30;
+    const snake = [];
+    const tailLength = 10;
+    const speed = 2.5;
+    let direction = "RIGHT";
+    let vx = speed;
+    let vy = 0;
+    let food = { x: 0, y: 0 };
+    let currentFoodType = "eth";
+    let ethEaten = 0;
+    let score = 0;
+    let headImg = new Image();
+    headImg.src = "ethoshead.png";
     const ethImg = new Image();
-    ethImg.src = 'foodeth.png';
-
+    ethImg.src = "foodeth.png";
     const btcImg = new Image();
-    btcImg.src = 'foodbtc.png';
+    btcImg.src = "foodbtc.png";
 
     document.addEventListener("keydown", (e) => {
-      if (!game) return;
-      if (e.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
-      else if (e.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
-      else if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
-      else if (e.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
+      if (e.key === "ArrowUp" && vy === 0) { vx = 0; vy = -speed; direction = "UP"; }
+      if (e.key === "ArrowDown" && vy === 0) { vx = 0; vy = speed; direction = "DOWN"; }
+      if (e.key === "ArrowLeft" && vx === 0) { vx = -speed; vy = 0; direction = "LEFT"; }
+      if (e.key === "ArrowRight" && vx === 0) { vx = speed; vy = 0; direction = "RIGHT"; }
     });
 
-    function draw() {
+    function gameOver() {
+      finalScore.textContent = score;
+      popup.style.display = "block";
+      cancelAnimationFrame(animationId);
+    }
+
+    function placeFood() {
+      food.x = Math.floor(Math.random() * ((canvas.width - box) / box)) * box;
+      food.y = Math.floor(Math.random() * ((canvas.height - box) / box)) * box;
+    }
+
+    function drawSnakePart(x, y, isHead = false) {
+      ctx.save();
+      ctx.translate(x + box / 2, y + box / 2);
+      let angle = 0;
+      if (direction === "UP") angle = -Math.PI / 2;
+      if (direction === "DOWN") angle = Math.PI / 2;
+      if (direction === "LEFT") angle = Math.PI;
+      ctx.rotate(angle);
+      const size = isHead ? box * 1.2 : box * 0.5;
+      ctx.drawImage(headImg, -size/2, -size/2, size, size);
+      ctx.restore();
+    }
+
+    let animationId;
+    function animate() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      if (currentFoodType === "btc") canvas.classList.add("rainbow-frame");
+      else canvas.classList.remove("rainbow-frame");
 
-      // Efek pelangi
-      if (currentFoodType === 'btc') {
-        canvas.classList.add('rainbow-frame');
-      } else {
-        canvas.classList.remove('rainbow-frame');
-      }
+      
+      const head = {
+        x: (snake[0]?.x || 100) + vx,
+        y: (snake[0]?.y || 100) + vy
+      };
 
-      for (let i = 0; i < snake.length; i++) {
-        const part = snake[i];
-        const isHead = i === 0;
-
-        ctx.save();
-        ctx.translate(part.x + box / 2, part.y + box / 2);
-        let angle = 0;
-        if (direction === "UP") angle = -Math.PI / 2;
-        else if (direction === "DOWN") angle = Math.PI / 2;
-        else if (direction === "LEFT") angle = Math.PI;
-        ctx.rotate(angle);
-
-        const size = isHead ? box * 1.2 : box * 0.5;
-        ctx.drawImage(headImg, -size / 2, -size / 2, size, size);
-        ctx.restore();
-      }
-
-      const foodImg = currentFoodType === "eth" ? ethImg : btcImg;
-      ctx.drawImage(foodImg, food.x, food.y, box, box);
-
-      let headX = snake[0].x;
-      let headY = snake[0].y;
-
-      if (direction === "UP") headY -= box;
-      if (direction === "DOWN") headY += box;
-      if (direction === "LEFT") headX -= box;
-      if (direction === "RIGHT") headX += box;
-
-      if (headX < 0) headX = canvas.width - box;
-      if (headX >= canvas.width) headX = 0;
-      if (headY < 0) headY = canvas.height - box;
-      if (headY >= canvas.height) headY = 0;
-
-      if (snake.some((seg, i) => i !== 0 && seg.x === headX && seg.y === headY)) {
-        clearInterval(game);
-        finalScore.textContent = score;
-        popup.style.display = "block";
+      
+      if (head.x < 0 || head.x + box > canvas.width || head.y < 0 || head.y + box > canvas.height) {
+        gameOver();
         return;
       }
 
-      if (
-        Math.abs(headX - food.x) < box / 2 &&
-        Math.abs(headY - food.y) < box / 2
-      ) {
+      
+      for (let i = 1; i < snake.length; i++) {
+        const part = snake[i];
+        if (Math.abs(head.x - part.x) < box/2 && Math.abs(head.y - part.y) < box/2) {
+          gameOver();
+          return;
+        }
+      }
+
+      
+      snake.unshift(head);
+      while (snake.length > tailLength) snake.pop();
+
+      
+      snake.forEach((s, i) => drawSnakePart(s.x, s.y, i === 0));
+
+      
+      const foodImg = currentFoodType === "eth" ? ethImg : btcImg;
+      ctx.drawImage(foodImg, food.x, food.y, box, box);
+
+      
+      if (Math.abs(head.x - food.x) < box && Math.abs(head.y - food.y) < box) {
         if (currentFoodType === "eth") {
           score += 10;
           ethEaten++;
@@ -237,41 +250,31 @@
             currentFoodType = "btc";
             ethEaten = 0;
           }
-        } else if (currentFoodType === "btc") {
+        } else {
           score += 50;
           currentFoodType = "eth";
           ethEaten = 0;
         }
-
-        food = {
-          x: Math.floor(Math.random() * gridSizeX) * box,
-          y: Math.floor(Math.random() * gridSizeY) * box
-        };
-      } else {
-        snake.pop();
+        placeFood();
       }
 
-      const newHead = { x: headX, y: headY };
-      snake.unshift(newHead);
       scoreDisplay.textContent = score;
+      animationId = requestAnimationFrame(animate);
     }
 
-    function startGame() {
+    startBtn.onclick = () => {
       startBtn.style.display = "none";
       canvas.style.display = "block";
-      snake = [{ x: 5 * box, y: 5 * box }];
-      direction = "RIGHT";
+      snake.length = 0;
+      snake.push({ x: 100, y: 100 });
+      vx = speed;
+      vy = 0;
       score = 0;
       ethEaten = 0;
       currentFoodType = "eth";
-      food = {
-        x: Math.floor(Math.random() * gridSizeX) * box,
-        y: Math.floor(Math.random() * gridSizeY) * box
-      };
-      game = setInterval(draw, 240); // diperlambat
-    }
-
-    startBtn.addEventListener("click", startGame);
+      placeFood();
+      animate();
+    };
   </script>
 </body>
 </html>
