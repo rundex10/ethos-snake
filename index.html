@@ -7,7 +7,7 @@
   <style>
     @font-face {
       font-family: 'ChicagoGT';
-      src: url('chichagotlf.ttf') format('truetype');
+      src: url('cff.ttf') format('truetype');
     }
 
     body {
@@ -42,17 +42,24 @@
       font-size: 18px;
     }
 
+    .frame {
+      padding: 8px;
+      background:
+        repeating-linear-gradient(
+          45deg,
+          black 0 10px,
+          white 10px 20px
+        );
+      display: inline-block;
+      box-shadow: 4px 4px #404040;
+      margin-top: 10px;
+    }
+
     canvas {
       display: none;
       background-color: #c0d8ff;
-      border: 16px solid transparent;
-      background-clip: padding-box;
-      margin-top: 10px;
       image-rendering: pixelated;
-      background-image:
-        linear-gradient(45deg, black 25%, white 25%, white 50%, black 50%, black 75%, white 75%, white 100%);
-      background-size: 32px 32px;
-      box-shadow: 4px 4px #404040;
+      border: none;
     }
 
     .rainbow {
@@ -134,7 +141,9 @@
 <body>
   <img src="ethossnake.png" class="logo" alt="Logo">
   <div class="score">Score: <span id="score">0</span></div>
-  <canvas id="gameCanvas" width="720" height="480"></canvas>
+  <div class="frame" id="frame">
+    <canvas id="gameCanvas" width="720" height="480"></canvas>
+  </div>
   <button id="startBtn">Start Game</button>
 
   <div id="gameOverPopup">
@@ -150,6 +159,7 @@
     const startBtn = document.getElementById("startBtn");
     const popup = document.getElementById("gameOverPopup");
     const finalScore = document.getElementById("finalScore");
+    const frame = document.getElementById("frame");
 
     const box = 36;
     const rows = canvas.height / box;
@@ -201,8 +211,8 @@
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (currentFoodType === "btc") canvas.classList.add("rainbow");
-      else canvas.classList.remove("rainbow");
+      if (currentFoodType === "btc") frame.classList.add("rainbow");
+      else frame.classList.remove("rainbow");
 
       drawSnake();
       drawFood();
